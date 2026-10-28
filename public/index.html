@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4c1d95">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Soins">
+<link rel="manifest" href="/manifest.json">
+<title>Soins à réaliser</title>
+<style>
+:root {
+  --bg-grad: linear-gradient(145deg, #130926 0%, #241145 50%, #371a68 100%);
+  --header-grad: linear-gradient(135deg, rgba(28, 13, 54, 0.96) 0%, rgba(55, 24, 102, 0.96) 100%);
+  --btn-grad: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  --btn-sec: rgba(139, 92, 246, 0.18);
+  --surface: rgba(31, 16, 58, 0.88);
+  --surface-strong: #231242;
+  --ink: #f5f3ff;
+  --muted: #c4b5fd;
+  --line: rgba(167, 139, 250, 0.26);
+  --accent: #a78bfa;
+  --accent-ink: #ffffff;
+  --chip: rgba(139, 92, 246, 0.22);
+  --code: rgba(19, 9, 38, 0.65);
+  --danger: #fca5a5;
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  min-height: 100%;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-grad);
+  background-attachment: fixed;
+  color: var(--ink);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  display: flex;
+  flex-direction: column;
+}
+.hidden {
+  display: none !important;
+}
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+}
+button {
+  font: inherit;
+  border: 0;
+  border-radius: 9999px;
+  padding: 11px 20px;
+  background: var(--btn-grad);
+  color: var(--accent-ink);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.12s ease;
+}
+button:hover {
+  opacity: 0.92;
+}
+button:active {
+  opacity: 0.85;
+}
+button.secondary {
+  background: var(--btn-sec);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+header.bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--header-grad);
+  padding: calc(12px + env(safe-area-inset-top)) 14px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.search {
+  display: flex;
+  gap: 8px;
+}
+.search input,
+.auth-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  font: inherit;
+  font-size: 16px;
+  padding: 12px 18px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+.search input::placeholder,
+.auth-input::placeholder {
+  color: var(--muted);
+  opacity: 0.75;
+}
+.search input:focus,
+.auth-input:focus,
+.row2 select:focus {
+  outline: 2px solid var(--accent);
+  border-color: transparent;
+}
+.row2 {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+.row2 select {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 15px;
+  padding: 9px 16px;
+  border-radius: 9999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+.meta {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.stamp {
+  white-space: normal;
+  margin-top: 8px;
+}
+main {
+  flex: 1;
+  padding: 14px 14px 32px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.card h2 {
+  font-size: 17px;
+  line-height: 1.35;
+  margin: 0 0 10px;
+  font-weight: 650;
+}
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.badge {
+  font-size: 12.5px;
+  padding: 4px 11px;
+  border-radius: 9999px;
+  background: var(--chip);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.badge.on {
+  background: var(--btn-grad);
+  color: var(--accent-ink);
+  border-color: transparent;
+  font-weight: 600;
+}
+dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(105px, 34%) 1fr;
+  gap: 7px 12px;
+  font-size: 14.5px;
+}
+dt {
+  color: var(--muted);
+}
+dd {
+  margin: 0;
+  word-break: break-word;
+}
+dd a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 40px 10px;
+}
+.more {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+}
+.help {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 2px 4px 14px;
+}
+.help code {
+  background: var(--code);
+  padding: 2px 7px;
+  border-radius: 9999px;
+  color: var(--ink);
+}
+mark {
+  background: transparent;
+  color: #ddd6fe;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 3px;
+}
+.auth-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 14px;
+}
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 24px 20px;
+}
+.auth-card h1 {
+  margin: 0 0 8px;
+  font-size: 21px;
+}
+.auth-card p {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+.auth-field {
+  margin-bottom: 14px;
+}
+.cgv-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.cgv-check input {
+  margin-top: 3px;
+  accent-color: #8b5cf6;
+  width: 17px;
+  height: 17px;
+}
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--accent);
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 0;
+}
+.auth-error {
+  color: var(--danger);
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.auth-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+footer.foot {
+  padding: 16px 14px 28px;
+  text-align: center;
+  border-top: 1px solid var(--line);
+}
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(10, 4, 22, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-box {
+  width: 100%;
+  max-width: 620px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 22px 20px;
+}
+.modal-box h2 {
+  margin: 0 0 12px;
+  font-size: 19px;
+}
+.modal-box h3 {
+  margin: 16px 0 6px;
+  font-size: 15px;
+  color: var(--accent);
+}
+.modal-box p {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--ink);
+}
+.modal-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+</style>
+</head>
+<body>
+
+<section id="authView" class="auth-wrap hidden">
+  <div class="auth-card">
+    <h1>Accès aux soins hospitaliers</h1>
+    <p>Veuillez renseigner le mot de passe lors de votre première connexion pour accéder à la recherche de rendez vous médicaux.</p>
+    <form id="authForm">
+      <div class="auth-field">
+        <input id="pwdInput" class="auth-input" type="password" autocomplete="current-password" placeholder="Mot de passe" aria-label="Mot de passe" required>
+      </div>
+      <label class="cgv-check">
+        <input id="cgvCheckbox" type="checkbox" required>
+        <span>J'accepte les <button type="button" class="link-btn" id="openCgvFromAuth">Conditions Générales (CGV)</button> et l'engagement de confidentialité médicale.</span>
+      </label>
+      <div id="authError" class="auth-error hidden"></div>
+      <div class="auth-actions">
+        <button type="submit" id="authSubmit">Accéder à la recherche</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<div id="appView" class="hidden">
+  <header class="bar"><div class="wrap">
+    <form class="search" onsubmit="return false" role="search">
+      <input id="q" type="search" inputmode="search" enterkeyhint="search" autocomplete="off"
+        placeholder="Soin recherché (ex. détartrage)" aria-label="Rechercher dans Besoin exprimé">
+      <button type="button" id="refresh" title="Recharger le fichier" aria-label="Recharger le fichier">Recharger</button>
+    </form>
+    <div class="row2">
+      <select id="sort" aria-label="Trier par">
+        <option value="infos">Trier : le plus d'informations</option>
+        <option value="birth">Trier : date de naissance d'abord</option>
+        <option value="contact">Trier : contacts d'abord</option>
+        <option value="recent">Trier : ajoutés récemment d'abord</option>
+        <option value="old">Trier : plus anciens d'abord</option>
+      </select>
+      <span class="meta" id="count"></span>
+    </div>
+    <div class="meta stamp" id="stamp"></div>
+  </div></header>
+
+  <main><div class="wrap">
+    <p class="help">Plusieurs mots : tous requis. <code>"phrase exacte"</code>, <code>SAUF mot</code> pour exclure,
+      <code>a OU b</code>, <code>colonne:valeur</code> ou <code>ligne:10</code> pour filtrer.</p>
+    <div id="list"></div>
+  </div></main>
+</div>
+
+<footer class="foot">
+  <div class="wrap">
+    <button type="button" class="secondary" id="openCgvFooter">Conditions Générales (CGV)</button>
+  </div>
+</footer>
+
+<div id="cgvModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="cgvTitle">
+  <div class="modal-box">
+    <h2 id="cgvTitle">Conditions Générales d'Utilisation et de Confidentialité (CGV)</h2>
+    <h3>1. Objet de l'application</h3>
+    <p>Cette application web progressive est destinée exclusivement à faciliter la recherche de besoins de soins et la prise de rendez vous médicaux au sein du service hospitalier à partir du fichier de suivi des patients.</p>
+    <h3>2. Accès sécurisé</h3>
+    <p>L'accès à l'outil de recherche est strictement réservé aux praticiens, externes et personnels autorisés disposant du mot de passe d'accès. Ce mot de passe est demandé lors de la première utilisation sur l'appareil et ne doit être communiqué à aucun tiers non autorisé.</p>
+    <h3>3. Confidentialité et secret médical</h3>
+    <p>Les informations affichées (identité du patient, date de naissance, coordonnées téléphoniques ou électroniques, besoin médical exprimé et numéro de ligne du fichier) sont couvertes par le secret médical et la réglementation sur la protection des données personnelles.</p>
+    <h3>4. Usage strictement interne</h3>
+    <p>Toute extraction, copie externe, capture d'écran ou utilisation des coordonnées des patients à des fins autres que la programmation de rendez vous hospitaliers est formellement interdite.</p>
+    <h3>5. Vérification des dossiers</h3>
+    <p>Le numéro de ligne affiché sur chaque fiche permet de contrôler rapidement la correspondance exacte dans le fichier Excel partagé avant et après chaque appel.</p>
+    <div class="modal-actions">
+      <button type="button" id="closeCgvBtn">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const STORAGE_PWD_KEY = "soins_auth_pwd";
+const STORAGE_CGV_KEY = "soins_cgv_ok";
+
+const cleanDashes = (s) =>
+  String(s || "")
+    .split(/(\S+)/)
+    .map((tok) => (tok.includes("@") ? tok : tok.replace(/[\u002D\u2010-\u2015\u2212]+/g, " ")))
+    .join("")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+const norm = (s) =>
+  cleanDashes(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+const esc = (s) =>
+  String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+const slug = (s) => norm(s).replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+const PAGE = 40;
+
+let H = [], R = [], needIdx = 0, shown = PAGE, current = { res: [], terms: [] };
+
+function showAuthView(errorMsg) {
+  $("appView").classList.add("hidden");
+  $("authView").classList.remove("hidden");
+  if (errorMsg) {
+    $("authError").textContent = cleanDashes(errorMsg);
+    $("authError").classList.remove("hidden");
+  } else {
+    $("authError").classList.add("hidden");
+  }
+  if (localStorage.getItem(STORAGE_CGV_KEY) === "1") {
+    $("cgvCheckbox").checked = true;
+  }
+  $("pwdInput").focus();
+}
+
+function showAppView() {
+  $("authView").classList.add("hidden");
+  $("appView").classList.remove("hidden");
+}
+
+async function load(fresh, candidatePwd) {
+  const pwd = candidatePwd !== undefined ? candidatePwd : localStorage.getItem(STORAGE_PWD_KEY);
+  const cgvOk = candidatePwd !== undefined ? $("cgvCheckbox").checked : localStorage.getItem(STORAGE_CGV_KEY) === "1";
+
+  if (!pwd || !cgvOk) {
+    showAuthView();
+    return;
+  }
+
+  if (!$("appView").classList.contains("hidden")) {
+    $("list").innerHTML = '<div class="empty">Chargement du fichier en cours...</div>';
+  }
+
+  try {
+    const r = await fetch("/api/data" + (fresh ? "?t=" + Date.now() : ""), {
+      headers: { "x-app-password": pwd }
+    });
+    const d = await r.json();
+
+    if (r.status === 401) {
+      localStorage.removeItem(STORAGE_PWD_KEY);
+      showAuthView("Mot de passe incorrect. Veuillez vérifier votre saisie.");
+      return;
+    }
+
+    if (!r.ok) throw new Error(d.error || "Erreur serveur");
+
+    localStorage.setItem(STORAGE_PWD_KEY, pwd);
+    localStorage.setItem(STORAGE_CGV_KEY, "1");
+    showAppView();
+
+    H = d.headers.map((h) => ({ label: cleanDashes(h.label), kind: h.kind }));
+    const hm = (iso) => new Date(iso).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+    $("stamp").textContent = "Fichier lu le " + hm(d.updated) + (d.modified ? " · modifié sur kDrive le " + hm(d.modified) : "");
+    needIdx = Math.max(0, H.findIndex((h) => h.kind === "need"));
+
+    R = d.rows.map((entry, idx) => {
+      const rawCells = Array.isArray(entry) ? entry : entry.cells;
+      const line = Array.isArray(entry) ? idx + 2 : entry.line;
+      const cells = rawCells.map(cleanDashes);
+      const contacts = H.reduce((n, h, j) => n + (h.kind === "contact" && cells[j] ? 1 : 0), 0);
+      const birth = H.some((h, j) => h.kind === "birth" && cells[j]);
+      const filled = cells.filter(Boolean).length;
+      return {
+        i: idx,
+        line,
+        cells,
+        n: cells.map(norm),
+        contacts,
+        birth,
+        filled,
+        info: contacts + (birth ? 1 : 0)
+      };
+    });
+    run();
+  } catch (e) {
+    showAppView();
+    $("list").innerHTML = '<div class="empty">Impossible de charger le fichier.<br>' + esc(cleanDashes(e.message)) + "</div>";
+  }
+}
+
+function colIndex(name) {
+  const n = slug(name);
+  if (n === "ligne" || n === "line") return "line";
+  let j = H.findIndex((h) => slug(h.label) === n);
+  if (j < 0) j = H.findIndex((h) => slug(h.label).startsWith(n));
+  if (j < 0 && n.length >= 3) j = H.findIndex((h) => slug(h.label).includes(n));
+  return j;
+}
+
+const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+function buildTermRegex(text, quoted) {
+  const base = (!quoted && text.length >= 4 && !text.endsWith("s"))
+    ? escRe(text) + "s?"
+    : escRe(text);
+  return new RegExp("(?:^|[^a-z])(" + base + ")(?=$|[^a-z])", "g");
+}
+
+function parse(q) {
+  const prepared = q.replace(/\b(?:SAUF|NON)\s+/gi, "\u0000");
+  return prepared.split(/\s+(?:OR|OU)\s+/i).map((part) => {
+    const terms = [], re = /([\u0000\u002D]?)(?:([^\s:"]+):)?(?:"([^"]*)"|(\S+))/g;
+    let m;
+    while ((m = re.exec(part))) {
+      const quoted = m[3] !== undefined;
+      let col = needIdx, text = quoted ? m[3] : m[4];
+      if (m[2]) {
+        const j = colIndex(m[2]);
+        if (j === "line" || j >= 0) col = j;
+        else text = m[2] + ":" + text;
+      }
+      text = norm(text).trim();
+      if (text) {
+        terms.push({
+          col,
+          text,
+          neg: !!m[1],
+          quoted,
+          rx: buildTermRegex(text, quoted)
+        });
+      }
+    }
+    return terms;
+  }).filter((g) => g.length);
+}
+
+const match = (row, groups) =>
+  groups.some((g) =>
+    g.every((t) => {
+      if (t.col === "line") {
+        return (String(row.line) === t.text) !== t.neg;
+      }
+      t.rx.lastIndex = 0;
+      return t.rx.test(row.n[t.col]) !== t.neg;
+    })
+  );
+
+function hl(text, terms) {
+  let out = esc(text);
+  const posTerms = terms.filter((x) => !x.neg);
+  if (!posTerms.length) return out;
+  const ntext = norm(text);
+  if (ntext.length !== text.length) return out;
+  const ranges = [];
+  posTerms.forEach((t) => {
+    const rx = buildTermRegex(t.text, t.quoted);
+    let m;
+    while ((m = rx.exec(ntext)) !== null) {
+      const word = m[1];
+      const start = m.index + (m[0].length - word.length);
+      ranges.push([start, start + word.length]);
+      if (rx.lastIndex === m.index) rx.lastIndex++;
+    }
+  });
+  if (!ranges.length) return out;
+  ranges.sort((a, b) => a[0] - b[0]);
+  const merged = [ranges[0]];
+  for (const r of ranges.slice(1)) {
+    const l = merged[merged.length - 1];
+    if (r[0] <= l[1]) l[1] = Math.max(l[1], r[1]);
+    else merged.push(r);
+  }
+  let res = "", p = 0;
+  for (const [a, b] of merged) {
+    res += esc(text.slice(p, a)) + "<mark>" + esc(text.slice(a, b)) + "</mark>";
+    p = b;
+  }
+  return res + esc(text.slice(p));
+}
+
+function cellHtml(h, v) {
+  if (h.kind === "contact") {
+    const parts = v.split(/\s*[;\/\n]\s*/).filter(Boolean).map((p) => {
+      if (p.includes("@")) return `<a href="mailto:${esc(p)}">${esc(cleanDashes(p))}</a>`;
+      const digits = p.replace(/[^\d+]/g, "");
+      return digits.length >= 8 ? `<a href="tel:${esc(digits)}">${esc(p)}</a>` : esc(p);
+    });
+    return parts.join("<br>");
+  }
+  return esc(v);
+}
+
+function card(r, terms) {
+  const title = r.cells[needIdx] || "(sans besoin)";
+  const badges =
+    `<span class="badge on">Ligne Excel ${r.line}</span>` +
+    `<span class="badge ${r.birth ? "on" : ""}">${r.birth ? "Naissance renseignée" : "Naissance manquante"}</span>` +
+    `<span class="badge ${r.contacts ? "on" : ""}">${r.contacts} contact${r.contacts > 1 ? "s" : ""}</span>`;
+  const rows =
+    `<dt>Ligne Excel</dt><dd><strong>Ligne ${r.line}</strong></dd>` +
+    H.map((h, j) => (j === needIdx || !r.cells[j] ? "" : `<dt>${esc(h.label)}</dt><dd>${cellHtml(h, r.cells[j])}</dd>`)).join("");
+  return `<article class="card"><h2>${hl(title, terms.filter((t) => t.col === needIdx))}</h2><div class="badges">${badges}</div><dl>${rows}</dl></article>`;
+}
+
+function run() {
+  const q = $("q").value.trim(), sort = $("sort").value;
+  const groups = q ? parse(q) : [];
+  const terms = groups.flat();
+  let res = groups.length ? R.filter((r) => match(r, groups)) : R.slice();
+  const cmp = {
+    infos: (a, b) => b.info - a.info || b.filled - a.filled || a.line - b.line,
+    birth: (a, b) => (b.birth - a.birth) || b.info - a.info || a.line - b.line,
+    contact: (a, b) => b.contacts - a.contacts || b.info - a.info || a.line - b.line,
+    recent: (a, b) => b.line - a.line,
+    old: (a, b) => a.line - b.line,
+  }[sort];
+  res.sort(cmp);
+  current = { res, terms };
+  shown = PAGE;
+  $("count").textContent = res.length + " résultat" + (res.length > 1 ? "s" : "");
+  render();
+}
+
+function render() {
+  const { res, terms } = current;
+  if (!res.length) {
+    $("list").innerHTML = '<div class="empty">Aucun résultat pour cette recherche dans Besoin exprimé.</div>';
+    return;
+  }
+  $("list").innerHTML =
+    res.slice(0, shown).map((r) => card(r, terms)).join("") +
+    (res.length > shown ? `<button class="more secondary" id="more">Afficher la suite (${res.length - shown})</button>` : "");
+  const more = $("more");
+  if (more) more.onclick = () => { shown += PAGE; render(); };
+}
+
+$("authForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const pwd = $("pwdInput").value.trim();
+  if (!$("cgvCheckbox").checked) {
+    showAuthView("Veuillez accepter les Conditions Générales (CGV) pour continuer.");
+    return;
+  }
+  if (!pwd) {
+    showAuthView("Veuillez saisir le mot de passe.");
+    return;
+  }
+  load(false, pwd);
+});
+
+$("openCgvFromAuth").addEventListener("click", () => $("cgvModal").classList.remove("hidden"));
+$("openCgvFooter").addEventListener("click", () => $("cgvModal").classList.remove("hidden"));
+$("closeCgvBtn").addEventListener("click", () => $("cgvModal").classList.add("hidden"));
+$("cgvModal").addEventListener("click", (e) => {
+  if (e.target === $("cgvModal")) $("cgvModal").classList.add("hidden");
+});
+
+let t;
+$("q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(run, 120); });
+$("sort").addEventListener("change", run);
+$("refresh").addEventListener("click", () => load(true));
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
+
+load(false);
+</script>
+</body>
+</html>

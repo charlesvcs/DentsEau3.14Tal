@@ -1,0 +1,12 @@
+{
+  "name": "Soins à réaliser",
+  "short_name": "Soins",
+  "description": "Recherche et prise de rendez vous médicaux hospitaliers",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#160d2e",
+  "theme_color": "#4c1d95",
+  "lang": "fr"
+}
