@@ -1,4 +1,4 @@
-const CACHE_NAME = "soins_pwa_v1";
+const CACHE_NAME = "soins_pwa_v2";
 const STATIC_ASSETS = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -38,18 +38,17 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Network-first for static assets so app updates on Vercel are reflected immediately,
+  // with offline cache fallback for PWA reliability.
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const networkFetch = fetch(event.request)
-        .then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          }
-          return response;
-        })
-        .catch(() => cached);
-      return cached || networkFetch;
-    })
+    fetch(event.request)
+      .then((response) => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

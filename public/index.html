@@ -25,6 +25,15 @@
   --chip: rgba(139, 92, 246, 0.22);
   --code: rgba(19, 9, 38, 0.65);
   --danger: #fca5a5;
+  --danger-bg: rgba(239, 68, 68, 0.22);
+  --danger-border: rgba(248, 113, 113, 0.45);
+  --success: #34d399;
+  --success-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --success-bg: rgba(16, 185, 129, 0.18);
+  --success-border: rgba(52, 211, 153, 0.45);
+  --warn: #fbbf24;
+  --warn-bg: rgba(245, 158, 11, 0.18);
+  --warn-border: rgba(251, 191, 36, 0.45);
   color-scheme: dark;
 }
 * {
@@ -44,6 +53,7 @@ body {
   padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 .hidden {
   display: none !important;
@@ -62,7 +72,7 @@ button {
   color: var(--accent-ink);
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.12s ease;
+  transition: opacity 0.12s ease, transform 0.1s ease;
 }
 button:hover {
   opacity: 0.92;
@@ -75,20 +85,72 @@ button.secondary {
   color: var(--ink);
   border: 1px solid var(--line);
 }
+button.sm {
+  padding: 7px 13px;
+  font-size: 13.5px;
+}
 header.bar {
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 10;
   background: var(--header-grad);
-  padding: calc(12px + env(safe-area-inset-top)) 14px 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: calc(10px + env(safe-area-inset-top)) 14px 12px;
   border-bottom: 1px solid var(--line);
+}
+.tabs {
+  display: flex;
+  gap: 6px;
+  background: rgba(15, 7, 30, 0.55);
+  padding: 4px;
+  border-radius: 9999px;
+  border: 1px solid var(--line);
+  margin-bottom: 10px;
+}
+.tab-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14.5px;
+  font-weight: 600;
+  border: 0;
+}
+.tab-btn.active {
+  background: var(--btn-grad);
+  color: var(--accent-ink);
+  box-shadow: 0 2px 10px rgba(109, 40, 217, 0.45);
+}
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--ink);
+}
+.tab-btn.active .tab-count {
+  background: rgba(19, 9, 38, 0.45);
+  color: #fff;
 }
 .search {
   display: flex;
   gap: 8px;
 }
 .search input,
-.auth-input {
+.auth-input,
+.note-input {
   flex: 1;
   min-width: 0;
   width: 100%;
@@ -101,12 +163,14 @@ header.bar {
   color: var(--ink);
 }
 .search input::placeholder,
-.auth-input::placeholder {
+.auth-input::placeholder,
+.note-input::placeholder {
   color: var(--muted);
   opacity: 0.75;
 }
 .search input:focus,
 .auth-input:focus,
+.note-input:focus,
 .row2 select:focus {
   outline: 2px solid var(--accent);
   border-color: transparent;
@@ -137,22 +201,180 @@ header.bar {
   white-space: normal;
   margin-top: 8px;
 }
+.saved-header-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.saved-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+.csv-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.pill-btn {
+  padding: 6px 13px;
+  font-size: 13px;
+  border-radius: 9999px;
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  font-weight: 600;
+}
+.pill-btn.active {
+  background: var(--btn-sec);
+  color: var(--ink);
+  border-color: var(--accent);
+}
 main {
   flex: 1;
   padding: 14px 14px 32px;
 }
+.swipe-wrap {
+  position: relative;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.swipe-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  font-weight: 700;
+  font-size: 15px;
+  border-radius: 16px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+.swipe-bg.save-bg {
+  justify-content: flex-start;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.85) 0%, rgba(109, 40, 217, 0.65) 100%);
+  color: #ffffff;
+}
+.swipe-bg.remove-bg {
+  justify-content: flex-end;
+  background: linear-gradient(270deg, rgba(220, 38, 38, 0.88) 0%, rgba(153, 27, 27, 0.65) 100%);
+  color: #ffffff;
+}
 .card {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 16px;
-  margin-bottom: 12px;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+  touch-action: pan-y;
+}
+.card.swiping {
+  transition: none !important;
+}
+.card.is-saved {
+  border-color: rgba(167, 139, 250, 0.55);
+}
+.card.is-contacted {
+  border-color: var(--success-border);
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.18);
+}
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 .card h2 {
   font-size: 17px;
   line-height: 1.35;
-  margin: 0 0 10px;
+  margin: 0;
   font-weight: 650;
+  flex: 1;
+}
+.card-quick-btn {
+  flex-shrink: 0;
+  padding: 5px 11px;
+  font-size: 12.5px;
+  border-radius: 9999px;
+  background: var(--btn-sec);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  font-weight: 600;
+}
+.card-quick-btn.saved {
+  background: rgba(139, 92, 246, 0.32);
+  border-color: var(--accent);
+  color: #ede9fe;
+}
+.card-quick-btn.remove {
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+.contacted-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: rgba(19, 9, 38, 0.55);
+  border: 1px solid var(--line);
+}
+.contacted-bar.done {
+  background: rgba(6, 78, 59, 0.35);
+  border-color: var(--success-border);
+}
+.contact-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 15px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid var(--warn-border);
+  background: var(--warn-bg);
+  color: #fde68a;
+  transition: all 0.15s ease;
+}
+.contact-toggle.on {
+  border-color: transparent;
+  background: var(--success-grad);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+}
+.saved-meta-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.note-box {
+  margin-bottom: 12px;
+}
+.note-input {
+  border-radius: 12px;
+  padding: 9px 13px;
+  font-size: 14px;
+  background: rgba(19, 9, 38, 0.5);
+  border: 1px solid var(--line);
 }
 .badges {
   display: flex;
@@ -172,6 +394,18 @@ main {
   background: var(--btn-grad);
   color: var(--accent-ink);
   border-color: transparent;
+  font-weight: 600;
+}
+.badge.saved-badge {
+  background: var(--warn-bg);
+  color: #fde68a;
+  border-color: var(--warn-border);
+  font-weight: 600;
+}
+.badge.contacted-badge {
+  background: var(--success-bg);
+  color: #6ee7b7;
+  border-color: var(--success-border);
   font-weight: 600;
 }
 dl {
@@ -196,7 +430,10 @@ dd a {
 .empty {
   text-align: center;
   color: var(--muted);
-  padding: 40px 10px;
+  padding: 40px 14px;
+  background: rgba(31, 16, 58, 0.45);
+  border: 1px dashed var(--line);
+  border-radius: 16px;
 }
 .more {
   display: block;
@@ -206,13 +443,25 @@ dd a {
 .help {
   font-size: 13px;
   color: var(--muted);
-  margin: 2px 4px 14px;
+  margin: 2px 4px 12px;
 }
 .help code {
   background: var(--code);
   padding: 2px 7px;
   border-radius: 9999px;
   color: var(--ink);
+}
+.swipe-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #ddd6fe;
+  background: rgba(139, 92, 246, 0.14);
+  border: 1px solid var(--line);
+  padding: 8px 13px;
+  border-radius: 12px;
+  margin-bottom: 12px;
 }
 mark {
   background: transparent;
@@ -291,7 +540,7 @@ footer.foot {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 20;
+  z-index: 30;
   background: rgba(10, 4, 22, 0.82);
   display: flex;
   align-items: center;
@@ -328,6 +577,28 @@ footer.foot {
   justify-content: flex-end;
   gap: 10px;
 }
+.toast-box {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 40;
+  background: #190d30;
+  border: 1px solid var(--accent);
+  color: var(--ink);
+  padding: 10px 16px;
+  border-radius: 9999px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  max-width: 92vw;
+}
+.toast-box button {
+  padding: 5px 12px;
+  font-size: 13px;
+}
 </style>
 </head>
 <body>
@@ -354,28 +625,73 @@ footer.foot {
 
 <div id="appView" class="hidden">
   <header class="bar"><div class="wrap">
-    <form class="search" onsubmit="return false" role="search">
-      <input id="q" type="search" inputmode="search" enterkeyhint="search" autocomplete="off"
-        placeholder="Soin recherché (ex. détartrage)" aria-label="Rechercher dans Besoin exprimé">
-      <button type="button" id="refresh" title="Recharger le fichier" aria-label="Recharger le fichier">Recharger</button>
-    </form>
-    <div class="row2">
-      <select id="sort" aria-label="Trier par">
-        <option value="infos">Trier : le plus d'informations</option>
-        <option value="birth">Trier : date de naissance d'abord</option>
-        <option value="contact">Trier : contacts d'abord</option>
-        <option value="recent">Trier : ajoutés récemment d'abord</option>
-        <option value="old">Trier : plus anciens d'abord</option>
-      </select>
-      <span class="meta" id="count"></span>
+    <nav class="tabs" aria-label="Navigation principale">
+      <button type="button" id="tabBtnSearch" class="tab-btn active">
+        <span>Recherche</span>
+      </button>
+      <button type="button" id="tabBtnSaved" class="tab-btn">
+        <span>Enregistrés</span>
+        <span id="savedTabCount" class="tab-count">0</span>
+      </button>
+    </nav>
+
+    <div id="searchHeaderControls">
+      <form class="search" onsubmit="return false" role="search">
+        <input id="q" type="search" inputmode="search" enterkeyhint="search" autocomplete="off"
+          placeholder="Soin recherché (ex. détartrage)" aria-label="Rechercher dans Besoin exprimé">
+        <button type="button" id="refresh" title="Recharger le fichier" aria-label="Recharger le fichier">Recharger</button>
+      </form>
+      <div class="row2">
+        <select id="sort" aria-label="Trier par">
+          <option value="infos">Trier : le plus d'informations</option>
+          <option value="birth">Trier : date de naissance d'abord</option>
+          <option value="contact">Trier : contacts d'abord</option>
+          <option value="recent">Trier : ajoutés récemment d'abord</option>
+          <option value="old">Trier : plus anciens d'abord</option>
+        </select>
+        <span class="meta" id="count"></span>
+      </div>
+      <div class="meta stamp" id="stamp"></div>
     </div>
-    <div class="meta stamp" id="stamp"></div>
+
+    <div id="savedHeaderControls" class="saved-header-controls hidden">
+      <div class="saved-actions-row">
+        <div class="filter-pills" role="group" aria-label="Filtrer les patients enregistrés">
+          <button type="button" class="pill-btn active" data-filter="all" id="filterAll">Tous</button>
+          <button type="button" class="pill-btn" data-filter="todo" id="filterTodo">À contacter</button>
+          <button type="button" class="pill-btn" data-filter="done" id="filterDone">Contactés ✓</button>
+        </div>
+        <div class="csv-btns">
+          <button type="button" class="secondary sm" id="exportCsvBtn" title="Exporter l'historique en CSV">Exporter CSV</button>
+          <button type="button" class="secondary sm" id="importCsvBtn" title="Charger un fichier CSV d'historique">Importer CSV</button>
+          <input type="file" id="csvFileInput" accept=".csv,text/csv" class="hidden">
+        </div>
+      </div>
+      <form class="search" onsubmit="return false" role="search">
+        <input id="savedQ" type="search" inputmode="search" enterkeyhint="search" autocomplete="off"
+          placeholder="Filtrer dans les enregistrés (nom, soin, ligne, note...)" aria-label="Filtrer dans les enregistrés">
+      </form>
+    </div>
   </div></header>
 
   <main><div class="wrap">
-    <p class="help">Plusieurs mots : tous requis. <code>"phrase exacte"</code>, <code>SAUF mot</code> pour exclure,
-      <code>a OU b</code>, <code>colonne:valeur</code> ou <code>ligne:10</code> pour filtrer.</p>
-    <div id="list"></div>
+    <section id="searchSection">
+      <p class="help">Plusieurs mots : tous requis. <code>"phrase exacte"</code>, <code>SAUF mot</code> pour exclure,
+        <code>a OU b</code>, <code>colonne:valeur</code> ou <code>ligne:10</code> pour filtrer.</p>
+      <div class="swipe-hint">
+        <span>👉</span>
+        <span>Glissez une carte vers la droite (ou touchez <strong>☆ Enregistrer</strong>) pour l'ajouter à l'onglet <strong>Enregistrés</strong>.</span>
+      </div>
+      <div id="list"></div>
+    </section>
+
+    <section id="savedSection" class="hidden">
+      <div class="swipe-hint">
+        <span>👈</span>
+        <span>Empilés du plus récent au plus ancien. Indiquez <strong>Contacté</strong>, ajoutez une note, ou glissez vers la gauche pour retirer.</span>
+      </div>
+      <div id="savedList"></div>
+    </section>
   </div></main>
 </div>
 
@@ -384,6 +700,11 @@ footer.foot {
     <button type="button" class="secondary" id="openCgvFooter">Conditions Générales (CGV)</button>
   </div>
 </footer>
+
+<div id="toast" class="toast-box hidden" role="status" aria-live="polite">
+  <span id="toastMsg"></span>
+  <button type="button" id="toastUndo" class="secondary sm hidden">Annuler</button>
+</div>
 
 <div id="cgvModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="cgvTitle">
   <div class="modal-box">
@@ -408,6 +729,7 @@ footer.foot {
 const $ = (id) => document.getElementById(id);
 const STORAGE_PWD_KEY = "soins_auth_pwd";
 const STORAGE_CGV_KEY = "soins_cgv_ok";
+const STORAGE_SAVED_KEY = "soins_saved_patients_v1";
 
 const cleanDashes = (s) =>
   String(s || "")
@@ -421,12 +743,256 @@ const norm = (s) =>
   cleanDashes(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 const esc = (s) =>
-  String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 const slug = (s) => norm(s).replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
 const PAGE = 40;
 
 let H = [], R = [], needIdx = 0, shown = PAGE, current = { res: [], terms: [] };
+let activeTab = "search";
+let savedFilter = "all";
+let savedPatients = [];
+let toastTimer = null;
+let lastRemovedEntry = null;
+
+function loadSavedFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_SAVED_KEY);
+    if (!raw) {
+      savedPatients = [];
+      return;
+    }
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      savedPatients = parsed.map(normalizeSavedEntry).filter(Boolean);
+      sortSavedPatients();
+    } else {
+      savedPatients = [];
+    }
+  } catch (e) {
+    savedPatients = [];
+  }
+}
+
+function saveToStorage() {
+  try {
+    localStorage.setItem(STORAGE_SAVED_KEY, JSON.stringify(savedPatients));
+  } catch (e) {}
+  updateSavedBadge();
+}
+
+function sortSavedPatients() {
+  savedPatients.sort((a, b) => {
+    const ta = Date.parse(a.savedAt || "") || 0;
+    const tb = Date.parse(b.savedAt || "") || 0;
+    return tb - ta;
+  });
+}
+
+function inferKind(label) {
+  const n = norm(label);
+  if (/besoin/.test(n)) return "need";
+  if (/naissance|ne\(e\) le|\bdob\b/.test(n)) return "birth";
+  if (/\btel|phone|mobile|portable|gsm|mail|courriel|contact|whatsapp/.test(n)) return "contact";
+  return "other";
+}
+
+function buildPatientId(line, fields) {
+  const getVal = (re) => {
+    const f = (fields || []).find((x) => re.test(norm(x.label)));
+    return f ? slug(f.value) : "";
+  };
+  const nom = getVal(/\bnom\s*patient\b|^nom$/);
+  const prenom = getVal(/\bprenom\s*patient\b|^prenom$/);
+  const tel = getVal(/tel|phone|mobile|portable|contact/);
+  const suffix = [nom, prenom, tel].filter(Boolean).join("_");
+  return "L" + String(line || 0) + (suffix ? "_" + suffix : "");
+}
+
+function normalizeSavedEntry(entry) {
+  if (!entry || typeof entry !== "object") return null;
+  const line = Number(entry.line) || 0;
+  const fields = Array.isArray(entry.fields)
+    ? entry.fields.map((f) => ({
+        label: cleanDashes(f.label || ""),
+        value: String(f.value ?? "").trim(),
+        kind: f.kind || inferKind(f.label || "")
+      })).filter((f) => f.label)
+    : [];
+
+  let title = entry.title ? cleanDashes(entry.title) : "";
+  if (!title) {
+    const needField = fields.find((f) => f.kind === "need" || /besoin/.test(norm(f.label)));
+    title = needField && needField.value ? needField.value : "(sans besoin)";
+  }
+
+  const contacts = fields.reduce((n, f) => n + (f.kind === "contact" && f.value ? 1 : 0), 0);
+  const birth = fields.some((f) => f.kind === "birth" && f.value);
+
+  return {
+    id: entry.id || buildPatientId(line, fields),
+    line,
+    savedAt: entry.savedAt || new Date().toISOString(),
+    contacted: Boolean(entry.contacted),
+    contactedAt: entry.contactedAt || null,
+    note: String(entry.note ?? ""),
+    title,
+    birth: entry.birth !== undefined ? Boolean(entry.birth) : birth,
+    contacts: entry.contacts !== undefined ? Number(entry.contacts) : contacts,
+    fields
+  };
+}
+
+function rowToSavedEntry(r, existing) {
+  const fields = H.map((h, j) => ({
+    label: h.label,
+    value: r.cells[j] || "",
+    kind: h.kind
+  }));
+  const title = r.cells[needIdx] || "(sans besoin)";
+  return {
+    id: buildPatientId(r.line, fields),
+    line: r.line,
+    savedAt: existing && existing.savedAt ? existing.savedAt : new Date().toISOString(),
+    contacted: existing ? Boolean(existing.contacted) : false,
+    contactedAt: existing ? existing.contactedAt || null : null,
+    note: existing ? String(existing.note ?? "") : "",
+    title,
+    birth: r.birth,
+    contacts: r.contacts,
+    fields
+  };
+}
+
+function findSavedIndexForRow(r) {
+  const fields = H.map((h, j) => ({ label: h.label, value: r.cells[j] || "", kind: h.kind }));
+  const targetId = buildPatientId(r.line, fields);
+  let idx = savedPatients.findIndex((p) => p.id === targetId);
+  if (idx >= 0) return idx;
+  return savedPatients.findIndex((p) => Number(p.line) === Number(r.line));
+}
+
+function syncSavedWithLoadedRows() {
+  if (!R.length || !H.length) return;
+  let changed = false;
+  for (let i = 0; i < savedPatients.length; i++) {
+    const sp = savedPatients[i];
+    const matchRow = R.find((r) => {
+      const f = H.map((h, j) => ({ label: h.label, value: r.cells[j] || "", kind: h.kind }));
+      return buildPatientId(r.line, f) === sp.id || Number(r.line) === Number(sp.line);
+    });
+    if (matchRow) {
+      const updated = rowToSavedEntry(matchRow, sp);
+      savedPatients[i] = updated;
+      changed = true;
+    }
+  }
+  if (changed) saveToStorage();
+}
+
+function updateSavedBadge() {
+  const total = savedPatients.length;
+  const done = savedPatients.filter((p) => p.contacted).length;
+  const todo = total - done;
+  $("savedTabCount").textContent = total;
+  $("filterAll").textContent = `Tous (${total})`;
+  $("filterTodo").textContent = `À contacter (${todo})`;
+  $("filterDone").textContent = `Contactés ✓ (${done})`;
+}
+
+function showToast(msg, undoCallback) {
+  if (toastTimer) clearTimeout(toastTimer);
+  $("toastMsg").textContent = msg;
+  const undoBtn = $("toastUndo");
+  if (undoCallback) {
+    undoBtn.classList.remove("hidden");
+    undoBtn.onclick = () => {
+      undoCallback();
+      $("toast").classList.add("hidden");
+    };
+  } else {
+    undoBtn.classList.add("hidden");
+    undoBtn.onclick = null;
+  }
+  $("toast").classList.remove("hidden");
+  toastTimer = setTimeout(() => {
+    $("toast").classList.add("hidden");
+  }, 4000);
+}
+
+function savePatientFromRow(r) {
+  const existingIdx = findSavedIndexForRow(r);
+  if (existingIdx >= 0) {
+    savedPatients[existingIdx].savedAt = new Date().toISOString();
+    sortSavedPatients();
+    saveToStorage();
+    render();
+    renderSaved();
+    showToast(`Ligne ${r.line} remontée en haut des enregistrés`);
+    return;
+  }
+  const entry = rowToSavedEntry(r, null);
+  savedPatients.unshift(entry);
+  sortSavedPatients();
+  saveToStorage();
+  render();
+  renderSaved();
+  showToast(`Patient (Ligne ${r.line}) enregistré`);
+}
+
+function removeSavedById(id) {
+  const idx = savedPatients.findIndex((p) => p.id === id);
+  if (idx < 0) return;
+  const removed = savedPatients.splice(idx, 1)[0];
+  lastRemovedEntry = removed;
+  saveToStorage();
+  render();
+  renderSaved();
+  showToast(`Patient (Ligne ${removed.line}) retiré`, () => {
+    if (lastRemovedEntry) {
+      savedPatients.push(lastRemovedEntry);
+      sortSavedPatients();
+      lastRemovedEntry = null;
+      saveToStorage();
+      render();
+      renderSaved();
+    }
+  });
+}
+
+function toggleContactedById(id) {
+  const item = savedPatients.find((p) => p.id === id);
+  if (!item) return;
+  item.contacted = !item.contacted;
+  item.contactedAt = item.contacted ? new Date().toISOString() : null;
+  saveToStorage();
+  render();
+  renderSaved();
+}
+
+function updateNoteById(id, noteText) {
+  const item = savedPatients.find((p) => p.id === id);
+  if (!item) return;
+  item.note = noteText;
+  saveToStorage();
+  render();
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  const isSearch = tab === "search";
+  $("tabBtnSearch").classList.toggle("active", isSearch);
+  $("tabBtnSaved").classList.toggle("active", !isSearch);
+  $("searchHeaderControls").classList.toggle("hidden", !isSearch);
+  $("savedHeaderControls").classList.toggle("hidden", isSearch);
+  $("searchSection").classList.toggle("hidden", !isSearch);
+  $("savedSection").classList.toggle("hidden", isSearch);
+  if (!isSearch) {
+    renderSaved();
+  } else {
+    render();
+  }
+}
 
 function showAuthView(errorMsg) {
   $("appView").classList.add("hidden");
@@ -502,10 +1068,13 @@ async function load(fresh, candidatePwd) {
         info: contacts + (birth ? 1 : 0)
       };
     });
+    syncSavedWithLoadedRows();
     run();
+    renderSaved();
   } catch (e) {
     showAppView();
     $("list").innerHTML = '<div class="empty">Impossible de charger le fichier.<br>' + esc(cleanDashes(e.message)) + "</div>";
+    renderSaved();
   }
 }
 
@@ -613,14 +1182,107 @@ function cellHtml(h, v) {
 
 function card(r, terms) {
   const title = r.cells[needIdx] || "(sans besoin)";
+  const savedIdx = findSavedIndexForRow(r);
+  const savedItem = savedIdx >= 0 ? savedPatients[savedIdx] : null;
+
+  let statusBadges = "";
+  if (savedItem) {
+    if (savedItem.contacted) {
+      statusBadges += `<button type="button" class="badge contacted-badge" data-action="toggle-contacted-search" data-saved-id="${esc(savedItem.id)}" title="Cliquer pour changer le statut Contacté">✓ Contacté</button>`;
+    } else {
+      statusBadges += `<button type="button" class="badge saved-badge" data-action="toggle-contacted-search" data-saved-id="${esc(savedItem.id)}" title="Cliquer pour marquer comme Contacté">★ Enregistré · À contacter</button>`;
+    }
+  }
+
   const badges =
+    statusBadges +
     `<span class="badge on">Ligne Excel ${r.line}</span>` +
     `<span class="badge ${r.birth ? "on" : ""}">${r.birth ? "Naissance renseignée" : "Naissance manquante"}</span>` +
     `<span class="badge ${r.contacts ? "on" : ""}">${r.contacts} contact${r.contacts > 1 ? "s" : ""}</span>`;
+
+  const noteRow = savedItem && savedItem.note
+    ? `<dt>Note personnelle</dt><dd><strong>${esc(savedItem.note)}</strong></dd>`
+    : "";
+
   const rows =
+    noteRow +
     `<dt>Ligne Excel</dt><dd><strong>Ligne ${r.line}</strong></dd>` +
     H.map((h, j) => (j === needIdx || !r.cells[j] ? "" : `<dt>${esc(h.label)}</dt><dd>${cellHtml(h, r.cells[j])}</dd>`)).join("");
-  return `<article class="card"><h2>${hl(title, terms.filter((t) => t.col === needIdx))}</h2><div class="badges">${badges}</div><dl>${rows}</dl></article>`;
+
+  const cardClasses = ["card"];
+  if (savedItem) cardClasses.push("is-saved");
+  if (savedItem && savedItem.contacted) cardClasses.push("is-contacted");
+
+  const btnLabel = savedItem ? "★ Enregistré" : "☆ Enregistrer";
+  const btnClass = savedItem ? "card-quick-btn saved" : "card-quick-btn";
+
+  return `<div class="swipe-wrap" data-mode="search" data-row-idx="${r.i}">
+    <div class="swipe-bg save-bg"><span>★ Enregistrer ce patient</span></div>
+    <article class="${cardClasses.join(" ")}">
+      <div class="card-top">
+        <h2>${hl(title, terms.filter((t) => t.col === needIdx))}</h2>
+        <button type="button" class="${btnClass}" data-action="save-row" data-row-idx="${r.i}">${btnLabel}</button>
+      </div>
+      <div class="badges">${badges}</div>
+      <dl>${rows}</dl>
+    </article>
+  </div>`;
+}
+
+function formatSavedDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function savedCardHtml(item) {
+  const badges =
+    `<span class="badge on">Ligne Excel ${item.line}</span>` +
+    `<span class="badge ${item.birth ? "on" : ""}">${item.birth ? "Naissance renseignée" : "Naissance manquante"}</span>` +
+    `<span class="badge ${item.contacts ? "on" : ""}">${item.contacts} contact${item.contacts > 1 ? "s" : ""}</span>`;
+
+  const rows =
+    `<dt>Ligne Excel</dt><dd><strong>Ligne ${item.line}</strong></dd>` +
+    (item.fields || [])
+      .map((f) => (f.kind === "need" || !f.value ? "" : `<dt>${esc(f.label)}</dt><dd>${cellHtml(f, f.value)}</dd>`))
+      .join("");
+
+  const toggleClass = item.contacted ? "contact-toggle on" : "contact-toggle";
+  const toggleText = item.contacted ? "✓ Contacté : Oui" : "○ Contacté : Non (À contacter)";
+  const barClass = item.contacted ? "contacted-bar done" : "contacted-bar";
+  const cardClass = item.contacted ? "card is-contacted" : "card is-saved";
+  const savedTime = formatSavedDate(item.savedAt);
+
+  return `<div class="swipe-wrap" data-mode="saved" data-saved-id="${esc(item.id)}">
+    <div class="swipe-bg remove-bg"><span>Retirer des enregistrés ✕</span></div>
+    <article class="${cardClass}">
+      <div class="${barClass}">
+        <button type="button" class="${toggleClass}" data-action="toggle-contacted" data-saved-id="${esc(item.id)}" aria-pressed="${item.contacted}">
+          <span>${toggleText}</span>
+        </button>
+        <div class="saved-meta-right">
+          ${savedTime ? `<span>Ajouté le ${esc(savedTime)}</span>` : ""}
+          <button type="button" class="card-quick-btn remove" data-action="remove-saved" data-saved-id="${esc(item.id)}" title="Retirer de la liste">Retirer ✕</button>
+        </div>
+      </div>
+      <div class="note-box">
+        <input type="text" class="note-input" data-action="edit-note" data-saved-id="${esc(item.id)}"
+          placeholder="Note personnelle (ex: messagerie vocale, rappeler jeudi...)"
+          value="${esc(item.note || "")}" aria-label="Note personnelle pour ce patient">
+      </div>
+      <div class="card-top">
+        <h2>${esc(item.title || "(sans besoin)")}</h2>
+      </div>
+      <div class="badges">${badges}</div>
+      <dl>${rows}</dl>
+    </article>
+  </div>`;
 }
 
 function run() {
@@ -644,6 +1306,7 @@ function run() {
 
 function render() {
   const { res, terms } = current;
+  if (!R.length) return;
   if (!res.length) {
     $("list").innerHTML = '<div class="empty">Aucun résultat pour cette recherche dans Besoin exprimé.</div>';
     return;
@@ -654,6 +1317,489 @@ function render() {
   const more = $("more");
   if (more) more.onclick = () => { shown += PAGE; render(); };
 }
+
+function renderSaved() {
+  updateSavedBadge();
+  const q = norm($("savedQ").value || "").trim();
+  let list = savedPatients.slice();
+
+  if (savedFilter === "todo") {
+    list = list.filter((p) => !p.contacted);
+  } else if (savedFilter === "done") {
+    list = list.filter((p) => p.contacted);
+  }
+
+  if (q) {
+    const words = q.split(/\s+/).filter(Boolean);
+    list = list.filter((p) => {
+      const hay = norm(
+        [
+          "ligne " + p.line,
+          p.title,
+          p.note,
+          ...(p.fields || []).map((f) => f.value)
+        ].join(" ")
+      );
+      return words.every((w) => hay.includes(w));
+    });
+  }
+
+  if (!savedPatients.length) {
+    $("savedList").innerHTML =
+      '<div class="empty">Aucun patient enregistré pour le moment.<br>Glissez une carte vers la droite dans l\'onglet <strong>Recherche</strong> ou importez un fichier CSV.</div>';
+    return;
+  }
+
+  if (!list.length) {
+    $("savedList").innerHTML =
+      '<div class="empty">Aucun patient enregistré ne correspond à ce filtre.</div>';
+    return;
+  }
+
+  $("savedList").innerHTML = list.map(savedCardHtml).join("");
+}
+
+// --- Gestion du Swipe tactile sur les cartes ---
+function setupSwipeListeners(containerEl) {
+  let activeCard = null;
+  let activeBg = null;
+  let activeWrap = null;
+  let mode = null;
+  let startX = 0;
+  let startY = 0;
+  let currentX = 0;
+  let tracking = false;
+  let lockedHorizontal = false;
+
+  containerEl.addEventListener("touchstart", (e) => {
+    if (e.touches.length !== 1) return;
+    const target = e.target;
+    if (target.closest("button, a, input, textarea, select, label")) return;
+    const wrap = target.closest(".swipe-wrap");
+    if (!wrap) return;
+
+    activeWrap = wrap;
+    activeCard = wrap.querySelector(".card");
+    activeBg = wrap.querySelector(".swipe-bg");
+    mode = wrap.getAttribute("data-mode");
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    currentX = 0;
+    tracking = true;
+    lockedHorizontal = false;
+  }, { passive: true });
+
+  containerEl.addEventListener("touchmove", (e) => {
+    if (!tracking || !activeCard) return;
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+
+    if (!lockedHorizontal) {
+      if (Math.abs(dy) > 10 && Math.abs(dy) >= Math.abs(dx)) {
+        tracking = false;
+        activeCard = null;
+        return;
+      }
+      if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+        lockedHorizontal = true;
+        activeCard.classList.add("swiping");
+      } else {
+        return;
+      }
+    }
+
+    // Search mode: swipe right (dx > 0) to save
+    // Saved mode: swipe left (dx < 0) to remove
+    if (mode === "search") {
+      currentX = Math.max(0, Math.min(dx, 140));
+    } else if (mode === "saved") {
+      currentX = Math.min(0, Math.max(dx, -140));
+    }
+
+    if (currentX !== 0 && e.cancelable) {
+      e.preventDefault();
+    }
+
+    activeCard.style.transform = `translateX(${currentX}px)`;
+    if (activeBg) {
+      const ratio = Math.min(1, Math.abs(currentX) / 80);
+      activeBg.style.opacity = String(ratio);
+    }
+  }, { passive: false });
+
+  function endSwipe() {
+    if (!tracking || !activeCard) return;
+    const cardEl = activeCard;
+    const bgEl = activeBg;
+    const wrapEl = activeWrap;
+    const finalX = currentX;
+    const currentMode = mode;
+
+    tracking = false;
+    lockedHorizontal = false;
+    activeCard = null;
+    activeBg = null;
+    activeWrap = null;
+    currentX = 0;
+
+    cardEl.classList.remove("swiping");
+    cardEl.style.transform = "";
+    if (bgEl) bgEl.style.opacity = "0";
+
+    if (currentMode === "search" && finalX >= 72) {
+      const rowIdx = Number(wrapEl.getAttribute("data-row-idx"));
+      const r = R[rowIdx];
+      if (r) savePatientFromRow(r);
+    } else if (currentMode === "saved" && finalX <= -72) {
+      const savedId = wrapEl.getAttribute("data-saved-id");
+      if (savedId) removeSavedById(savedId);
+    }
+  }
+
+  containerEl.addEventListener("touchend", endSwipe, { passive: true });
+  containerEl.addEventListener("touchcancel", endSwipe, { passive: true });
+}
+
+// --- Export & Import CSV ---
+function csvEscape(val) {
+  const s = String(val ?? "").replace(/\r?\n/g, " ");
+  if (/[",;]/.test(s)) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+function formatIsoForCsv(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return String(iso);
+  const pad2 = (n) => String(n).padStart(2, "0");
+  return (
+    d.getFullYear() +
+    "-" +
+    pad2(d.getMonth() + 1) +
+    "-" +
+    pad2(d.getDate()) +
+    " " +
+    pad2(d.getHours()) +
+    ":" +
+    pad2(d.getMinutes()) +
+    ":" +
+    pad2(d.getSeconds())
+  );
+}
+
+function exportSavedToCsv() {
+  if (!savedPatients.length) {
+    showToast("Aucun patient enregistré à exporter.");
+    return;
+  }
+
+  const extraLabels = [];
+  const seenLabels = new Set();
+  const baseReserved = new Set(["ligne_excel", "contacte", "note_personnelle", "date_d_enregistrement", "besoin_exprime"]);
+
+  if (H.length) {
+    H.forEach((h) => {
+      const s = slug(h.label);
+      if (!baseReserved.has(s) && !seenLabels.has(s)) {
+        seenLabels.add(s);
+        extraLabels.push(h.label);
+      }
+    });
+  }
+  savedPatients.forEach((p) => {
+    (p.fields || []).forEach((f) => {
+      const s = slug(f.label);
+      if (!baseReserved.has(s) && !seenLabels.has(s)) {
+        seenLabels.add(s);
+        extraLabels.push(f.label);
+      }
+    });
+  });
+
+  const headers = [
+    "Ligne Excel",
+    "Contacté",
+    "Note personnelle",
+    "Date d'enregistrement",
+    "Besoin exprimé",
+    ...extraLabels
+  ];
+
+  const lines = [headers.map(csvEscape).join(",")];
+
+  for (const p of savedPatients) {
+    const fieldMap = new Map();
+    (p.fields || []).forEach((f) => {
+      fieldMap.set(slug(f.label), f.value || "");
+    });
+
+    const row = [
+      p.line,
+      p.contacted ? "Oui" : "Non",
+      p.note || "",
+      formatIsoForCsv(p.savedAt),
+      p.title || fieldMap.get("besoin_exprime") || "",
+      ...extraLabels.map((lbl) => fieldMap.get(slug(lbl)) || "")
+    ];
+    lines.push(row.map(csvEscape).join(","));
+  }
+
+  const csvContent = "\uFEFF" + lines.join("\r\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const today = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `patients_enregistres_${today}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(`${savedPatients.length} patient(s) exporté(s) en CSV`);
+}
+
+function detectCsvDelimiter(text) {
+  const firstLine = text.split(/\r?\n/)[0] || "";
+  let inQuotes = false;
+  const counts = { ",": 0, ";": 0, "\t": 0 };
+  for (let i = 0; i < firstLine.length; i++) {
+    const ch = firstLine[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (!inQuotes && counts[ch] !== undefined) {
+      counts[ch]++;
+    }
+  }
+  if (counts[";"] > counts[","] && counts[";"] >= counts["\t"]) return ";";
+  if (counts["\t"] > counts[","] && counts["\t"] > counts[";"]) return "\t";
+  return ",";
+}
+
+function parseCsvRows(text, delimiter) {
+  const rows = [];
+  let row = [];
+  let cur = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        cur += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === delimiter) {
+        row.push(cur);
+        cur = "";
+      } else if (ch === "\r") {
+        if (text[i + 1] === "\n") i++;
+        row.push(cur);
+        rows.push(row);
+        row = [];
+        cur = "";
+      } else if (ch === "\n") {
+        row.push(cur);
+        rows.push(row);
+        row = [];
+        cur = "";
+      } else {
+        cur += ch;
+      }
+    }
+  }
+  if (cur.length > 0 || row.length > 0) {
+    row.push(cur);
+    rows.push(row);
+  }
+  return rows.filter((r) => r.some((cell) => String(cell).trim() !== ""));
+}
+
+function parseBooleanContacted(val) {
+  const n = norm(String(val || "")).trim();
+  return ["oui", "true", "1", "vrai", "yes", "x", "ok", "contacte"].includes(n);
+}
+
+function parseSavedDate(val) {
+  const s = String(val || "").trim();
+  if (!s) return new Date().toISOString();
+  const parsed = new Date(s.replace(" ", "T"));
+  if (!isNaN(parsed.getTime())) return parsed.toISOString();
+  const d2 = new Date(s);
+  if (!isNaN(d2.getTime())) return d2.toISOString();
+  return new Date().toISOString();
+}
+
+function importSavedFromCsvText(rawText) {
+  const text = String(rawText || "").replace(/^\uFEFF/, "");
+  const delimiter = detectCsvDelimiter(text);
+  const rows = parseCsvRows(text, delimiter);
+  if (rows.length < 2) {
+    showToast("Le fichier CSV est vide ou invalide.");
+    return;
+  }
+
+  const headerCells = rows[0].map((h) => cleanDashes(h));
+  const headerSlugs = headerCells.map((h) => slug(h));
+
+  const idxLine = headerSlugs.findIndex((s) => s === "ligne_excel" || s === "ligne" || s === "line");
+  const idxContacted = headerSlugs.findIndex((s) => s === "contacte" || s === "contacted" || s === "deja_contacte");
+  const idxNote = headerSlugs.findIndex((s) => s === "note_personnelle" || s === "note" || s === "notes");
+  const idxSavedAt = headerSlugs.findIndex((s) => s.includes("date_d_enregistrement") || s === "savedat" || s === "date_enregistrement");
+
+  let added = 0;
+  let updated = 0;
+
+  for (let rIdx = 1; rIdx < rows.length; rIdx++) {
+    const cells = rows[rIdx];
+    const lineVal = idxLine >= 0 ? Number(String(cells[idxLine] || "").replace(/[^\d]/g, "")) : 0;
+    const contactedVal = idxContacted >= 0 ? parseBooleanContacted(cells[idxContacted]) : false;
+    const noteVal = idxNote >= 0 ? String(cells[idxNote] || "").trim() : "";
+    const savedAtVal = idxSavedAt >= 0 ? parseSavedDate(cells[idxSavedAt]) : new Date().toISOString();
+
+    const fields = [];
+    for (let c = 0; c < headerCells.length; c++) {
+      if (c === idxLine || c === idxContacted || c === idxNote || c === idxSavedAt) continue;
+      const label = headerCells[c];
+      if (!label) continue;
+      const val = String(cells[c] || "").trim();
+      fields.push({
+        label,
+        value: val,
+        kind: inferKind(label)
+      });
+    }
+
+    // Enrich from loaded Excel rows R if available and fields were sparse
+    const matchingRow = lineVal && R.length ? R.find((row) => Number(row.line) === lineVal) : null;
+    if (matchingRow && H.length) {
+      const existingBySlug = new Map(fields.map((f) => [slug(f.label), f.value]));
+      fields.length = 0;
+      H.forEach((h, j) => {
+        const csvVal = existingBySlug.get(slug(h.label));
+        fields.push({
+          label: h.label,
+          value: csvVal !== undefined && csvVal !== "" ? csvVal : (matchingRow.cells[j] || ""),
+          kind: h.kind
+        });
+      });
+    }
+
+    const entry = normalizeSavedEntry({
+      line: lineVal,
+      savedAt: savedAtVal,
+      contacted: contactedVal,
+      contactedAt: contactedVal ? new Date().toISOString() : null,
+      note: noteVal,
+      fields
+    });
+
+    if (!entry || (!entry.line && !entry.fields.some((f) => f.value))) continue;
+
+    const existingIdx = savedPatients.findIndex(
+      (p) => p.id === entry.id || (entry.line && Number(p.line) === Number(entry.line))
+    );
+
+    if (existingIdx >= 0) {
+      const prev = savedPatients[existingIdx];
+      prev.contacted = entry.contacted;
+      if (entry.contacted && !prev.contactedAt) {
+        prev.contactedAt = new Date().toISOString();
+      }
+      if (entry.note) {
+        prev.note = entry.note;
+      }
+      if (entry.fields.some((f) => f.value)) {
+        prev.fields = entry.fields;
+        prev.title = entry.title;
+        prev.birth = entry.birth;
+        prev.contacts = entry.contacts;
+      }
+      updated++;
+    } else {
+      savedPatients.push(entry);
+      added++;
+    }
+  }
+
+  sortSavedPatients();
+  saveToStorage();
+  render();
+  renderSaved();
+  showToast(`CSV importé : ${added} ajouté(s), ${updated} mis à jour`);
+}
+
+// --- Événements UI ---
+$("tabBtnSearch").addEventListener("click", () => switchTab("search"));
+$("tabBtnSaved").addEventListener("click", () => switchTab("saved"));
+
+document.querySelectorAll(".pill-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".pill-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    savedFilter = btn.getAttribute("data-filter") || "all";
+    renderSaved();
+  });
+});
+
+$("list").addEventListener("click", (e) => {
+  const saveBtn = e.target.closest('[data-action="save-row"]');
+  if (saveBtn) {
+    const idx = Number(saveBtn.getAttribute("data-row-idx"));
+    if (R[idx]) savePatientFromRow(R[idx]);
+    return;
+  }
+  const toggleSearchBtn = e.target.closest('[data-action="toggle-contacted-search"]');
+  if (toggleSearchBtn) {
+    toggleContactedById(toggleSearchBtn.getAttribute("data-saved-id"));
+  }
+});
+
+$("savedList").addEventListener("click", (e) => {
+  const toggleBtn = e.target.closest('[data-action="toggle-contacted"]');
+  if (toggleBtn) {
+    toggleContactedById(toggleBtn.getAttribute("data-saved-id"));
+    return;
+  }
+  const removeBtn = e.target.closest('[data-action="remove-saved"]');
+  if (removeBtn) {
+    removeSavedById(removeBtn.getAttribute("data-saved-id"));
+  }
+});
+
+$("savedList").addEventListener("input", (e) => {
+  const noteInput = e.target.closest('[data-action="edit-note"]');
+  if (noteInput) {
+    updateNoteById(noteInput.getAttribute("data-saved-id"), noteInput.value);
+  }
+});
+
+$("exportCsvBtn").addEventListener("click", exportSavedToCsv);
+$("importCsvBtn").addEventListener("click", () => $("csvFileInput").click());
+$("csvFileInput").addEventListener("change", (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    importSavedFromCsvText(reader.result);
+    $("csvFileInput").value = "";
+  };
+  reader.onerror = () => {
+    showToast("Erreur lors de la lecture du fichier CSV.");
+    $("csvFileInput").value = "";
+  };
+  reader.readAsText(file, "utf-8");
+});
 
 $("authForm").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -678,8 +1824,12 @@ $("cgvModal").addEventListener("click", (e) => {
 
 let t;
 $("q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(run, 120); });
+$("savedQ").addEventListener("input", renderSaved);
 $("sort").addEventListener("change", run);
 $("refresh").addEventListener("click", () => load(true));
+
+setupSwipeListeners($("list"));
+setupSwipeListeners($("savedList"));
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -687,6 +1837,8 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+loadSavedFromStorage();
+updateSavedBadge();
 load(false);
 </script>
 </body>
